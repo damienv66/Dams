@@ -26,7 +26,6 @@ class GraphEncoder(nn.Module):
         x = graph_batch.x
         edge_index = graph_batch.edge_index
         batch = graph_batch.batch
-        print(x.size(),'x')
         x = self.conv1(x, edge_index)
         x = x.relu()
         x = self.conv2(x, edge_index)
@@ -85,7 +84,7 @@ class WGAN(nn.Module):
         return text_pred, mol_pred  
 
 class AMAN(nn.Module):
-    def __init__ (self, model_name, num_node_features, nout, graph_hidden_channels,nhid_WGAN=50,n_layers = 3):
+    def __init__ (self, model_name, num_node_features, nout, graph_hidden_channels,nhid_WGAN=100,n_layers = 3):
         super(AMAN, self).__init__()
 
         self.graph_encoder = GATEncoder(num_node_features, nout, graph_hidden_channels,n_layers)
