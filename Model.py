@@ -105,6 +105,12 @@ class AMAN(nn.Module):
 
         text_prob, mol_prob = self.WGAN(text_encoded,graph_encoded)
         return graph_encoded, text_encoded, text_prob, mol_prob
+    
+    def get_text_encoder(self):
+        return self.text_encoder
+    
+    def get_graph_encoder(self):
+        return self.graph_encoder
 
 
 
