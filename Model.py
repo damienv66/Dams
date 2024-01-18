@@ -154,4 +154,50 @@ class GATEncoder(nn.Module):
         return x
 
    
-   
+class AMAN_Encoder(nn.Module):
+    def __init__ (self, model_name, num_node_features, nout, graph_hidden_channels,n_layers = 3):
+        super(AMAN_Encoder, self).__init__()
+
+        self.graph_encoder = GATEncoder(num_node_features, nout, graph_hidden_channels,n_layers)
+        self.text_encoder = TextEncoder(model_name)
+        self.ln = nn.LayerNorm(nout)
+        self.lc = nn.Linear(nout, nout)
+        self.relu = nn.ReLU()
+
+    def forward(self, graph_batch, input_ids, attention_mask):
+        x = graph_batch.x
+        edge_index = graph_batch.edge_index
+        batch = graph_batch.batch
+      
+        graph_encoded = self.ln(self.graph_encoder(graph_batch))
+
+        text_encoded = self.ln(self.text_encoder(input_ids, attention_mask))
+
+        return graph_encoded, text_encoded
+    
+    def get_text_encoder(self):
+        return self.text_encoder
+    
+    def get_graph_encoder(self):
+        return self.graph_encoder
+
+class GAN(nn.Module):
+    def __init__(self, n_in, n_hid):
+        super(GAN, self).__init__()
+
+        self.n_hid = n_hid
+        self.n_in = n_in
+
+        self.fc1 = nn.Linear(n_in, n_hid)
+        self.fc2 = nn.Linear(n_hid, n_hid)
+        self.fc3 = nn.Linear(n_hid, 1)
+
+    def forward(self, text,mol):
+        text_pred = nn.LeakyReLU(negative_slope=0.2)(self.fc1(text))
+        text_pred = nn.LeakyReLU(negative_slope=0.2)(self.fc2(text_pred))
+        text_pred = nn.Sigmoid()(self.fc3(text_pred))
+        mol_pred = nn.LeakyReLU(negative_slope=0.2)(self.fc1(mol))
+        mol_pred = nn.LeakyReLU(negative_slope=0.2)(self.fc2(mol_pred))
+        mol_pred = nn.Sigmoid()(self.fc3(mol_pred))
+        return text_pred, mol_pred  
+    
